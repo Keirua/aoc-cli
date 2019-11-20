@@ -23,13 +23,13 @@ class Aoc < Thor
   def download(year, day)
     aoc = AocApi.new(year, ENV["AOC_COOKIE"])
     content = aoc.day(day)
-    if !Dir.exist?(ENV['INPUT_DIRECTORY'])
-      Dir.mkdir(ENV['INPUT_DIRECTORY'])
+    if !Dir.exist?(ENV['AOC_INPUT_DIRECTORY'])
+      Dir.mkdir(ENV['AOC_INPUT_DIRECTORY'])
     end
-    if !Dir.exist?(File.join(ENV['INPUT_DIRECTORY'], year))
-      Dir.mkdir(File.join(ENV['INPUT_DIRECTORY'], year))
+    if !Dir.exist?(File.join(ENV['AOC_INPUT_DIRECTORY'], year))
+      Dir.mkdir(File.join(ENV['AOC_INPUT_DIRECTORY'], year))
     end
-    File.open(File.join(ENV['INPUT_DIRECTORY'], year, "day-#{day}"), 'w') {|f| f.write content }
+    File.open(File.join(ENV['AOC_INPUT_DIRECTORY'], year, "day-#{day}"), 'w') {|f| f.write content }
   end
 
   desc "bootstrap YEAR DAY", "prepares a sample project for a given day"
@@ -45,5 +45,5 @@ class Aoc < Thor
   end
 end
 
-Dotenv.require_keys("AOC_COOKIE", "INPUT_DIRECTORY")
+Dotenv.require_keys("AOC_COOKIE", "AOC_INPUT_DIRECTORY")
 Aoc.start
