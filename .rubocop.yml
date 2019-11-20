@@ -1,0 +1,4 @@
+Style/NegatedIf:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
