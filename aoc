@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+require 'httparty'
+require 'dotenv/load'
+#require "rubygems" # ruby1.9 doesn't "require" it though
+require "thor"
+
+class AocApi
+  include HTTParty
+  base_uri 'adventofcode.com'
+
+  def initialize(year, session)
+    @year = year
+    @options = { headers: {"Cookie" => "session=#{session}"} }
+  end
+
+  def day(d)
+    self.class.get("/#{@year}/day/#{d}/input", @options)
+  end
+end
+
+class Aoc < Thor
+  desc "download YEAR DAY", "downloads an input file"
+  method_option :download, :aliases => "-d", :desc => "Delete the file after parsing it"
+  def download(year, day)
+    aoc = AocApi.new(year, ENV["AOC_COOKIE"])
+    content = aoc.day(day)
+    if !Dir.exist?(ENV['INPUT_DIRECTORY'])
+      Dir.mkdir(ENV['INPUT_DIRECTORY'])
+    end
+    if !Dir.exist?(File.join(ENV['INPUT_DIRECTORY'], year))
+      Dir.mkdir(File.join(ENV['INPUT_DIRECTORY'], year))
+    end
+    File.open(File.join(ENV['INPUT_DIRECTORY'], year, "day-#{day}"), 'w') {|f| f.write content }
+  end
+end
+
+Dotenv.require_keys("AOC_COOKIE", "INPUT_DIRECTORY")
+Aoc.start
