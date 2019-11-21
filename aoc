@@ -2,8 +2,10 @@
 require 'httparty'
 require 'dotenv/load'
 require 'thor'
-Dir[File.join(File.dirname(__FILE__), 'lib', '*.rb')].each { |file| require file }
-Dir[File.join(File.dirname(__FILE__), 'src', '**', '*.rb')].each { |file| require file }
+lib_files = File.join(File.dirname(__FILE__), 'lib', '*.rb')
+src_files = File.join(File.dirname(__FILE__), 'src', '**', '*.rb')
+Dir[lib_files].each { |file| require file }
+Dir[src_files].each { |file| require file }
 
 # The CLI application
 class Aoc < Thor
@@ -41,11 +43,11 @@ class Aoc < Thor
     end
     puts 'part 1:'
     puts puzzle.part1(input)
-    # part_2 = puzzle.part2(input)
-    # if part_2 != nil
-    #   puts "part 2:"
-    #   puts part_2
-    # end
+    part_2 = puzzle.part2(input)
+    if part_2 != nil
+      puts "part 2:"
+      puts part_2
+    end
   end
 end
 

@@ -1,3 +1,4 @@
+# Template management
 class Template
   def self.create_templates(year, day)
     PuzzleCache.skip_if_exists(puzzle_source_path(year, day)) do
