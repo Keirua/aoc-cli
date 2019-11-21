@@ -2,40 +2,8 @@
 require 'httparty'
 require 'dotenv/load'
 require 'thor'
-
-# HTTP API for downloading puzzles
-class AocApi
-  include HTTParty
-  base_uri 'adventofcode.com'
-
-  def initialize(year, session)
-    @year = year
-    @options = { headers: { 'Cookie' => "session=#{session}" } }
-  end
-
-  def day(day_number)
-    self.class.get("/#{@year}/day/#{day_number}/input", @options)
-  end
-end
-
-# Puzzle file management
-class PuzzleCache
-  def self.create_required_directories(year)
-    input_directory = ENV['AOC_INPUT_DIRECTORY']
-    Dir.mkdir(input_directory) if !Dir.exist?(input_directory)
-    year_directory = File.join(input_directory, year)
-    Dir.mkdir(year_directory) if !Dir.exist?(year_directory)
-  end
-
-  def self.puzzle_path(year, day)
-    File.join(ENV['AOC_INPUT_DIRECTORY'], year, "day-#{day}")
-  end
-
-  def self.save_puzzle(year, day, content)
-    create_required_directories(year)
-    File.open(puzzle_path(year, day), 'w') { |f| f.write content }
-  end
-end
+Dir[File.join(File.dirname(__FILE__), 'lib', '*.rb')].each { |file| require file }
+Dir[File.join(File.dirname(__FILE__), 'src', '**', '*.rb')].each { |file| require file }
 
 # The CLI application
 class Aoc < Thor
@@ -44,19 +12,40 @@ class Aoc < Thor
   def download(year, day)
     aoc_api = AocApi.new(year, ENV['AOC_COOKIE'])
     content = aoc_api.day(day)
-    PuzzleCache.save_puzzle(year, day, content)
+    PuzzleCache.save_puzzle(year, Day.pad(day), content)
   end
 
   desc 'bootstrap YEAR DAY', 'prepares a sample project for a given day'
   method_option :bootstrap, aliases: '-b'
   def bootstrap(year, day)
-    puts "bootstrap #{year} #{day}"
+    download(year, day)
+    Template.create_templates(year, day)
   end
 
   desc 'run YEAR DAY', 'executes a given day/year'
   method_option :run_day, aliases: '-r'
   def run_day(year, day)
-    puts "run #{year} #{day}"
+    padded_day = Day.pad(day)
+
+    begin
+      puzzle = Module.const_get("Year#{year}").const_get("Day#{padded_day}").new
+    rescue NameError
+      puts 'There is no solution for this puzzle'
+      # return
+    end
+    begin
+      input = File.read("./input/#{year}/day-#{padded_day}")
+    rescue Errno::ENOENT
+      puts 'The puzzle file is missing'
+      return
+    end
+    puts 'part 1:'
+    puts puzzle.part1(input)
+    # part_2 = puzzle.part2(input)
+    # if part_2 != nil
+    #   puts "part 2:"
+    #   puts part_2
+    # end
   end
 end
 
