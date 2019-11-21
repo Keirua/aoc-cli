@@ -1,10 +1,10 @@
+require 'fileutils'
+
 # Puzzle file management
 class PuzzleCache
   def self.create_required_directories(year)
-    input_directory = ENV['AOC_INPUT_DIRECTORY']
-    Dir.mkdir(input_directory) if !Dir.exist?(input_directory)
-    year_directory = File.join(input_directory, year)
-    Dir.mkdir(year_directory) if !Dir.exist?(year_directory)
+    year_directory = File.join(ENV['AOC_INPUT_DIRECTORY'], year)
+    FileUtils.mkdir_p(year_directory) if !Dir.exist?(year_directory)
   end
 
   def self.puzzle_path(year, day)
