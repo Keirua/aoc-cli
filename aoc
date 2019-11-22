@@ -16,7 +16,7 @@ class Aoc < Thor
     PuzzleInput.download(year, day)
   end
 
-  desc 'bootstrap YEAR DAY', 'prepares a sample project for a given day'
+  desc 'bootstrap YEAR DAY', 'prepares a sample project for a given day: downloads the input, creates a sample source and spec file'
   method_option :bootstrap, aliases: '-b'
   def bootstrap(year, day)
     ::PuzzleInput.download(year, day)
@@ -31,6 +31,22 @@ class Aoc < Thor
     input = PuzzleInput.load(year, day)
     PuzzleSource.run_part('part 1') { puzzle.part1(input) }
     puts
+    PuzzleSource.run_part('part 2') { puzzle.part2(input) }
+  end
+
+  desc 'part1 YEAR DAY', 'executes the part1 for a given day/year'
+  method_option :part1
+  def part1(year, day)
+    puzzle = PuzzleSource.create_puzzle(year, day)
+    input = PuzzleInput.load(year, day)
+    PuzzleSource.run_part('part 1') { puzzle.part1(input) }
+  end
+
+  desc 'part2 YEAR DAY', 'executes the part2 for a given day/year'
+  method_option :part2
+  def part2(year, day)
+    puzzle = PuzzleSource.create_puzzle(year, day)
+    input = PuzzleInput.load(year, day)
     PuzzleSource.run_part('part 2') { puzzle.part2(input) }
   end
 end
