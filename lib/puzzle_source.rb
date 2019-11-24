@@ -1,5 +1,6 @@
 require 'benchmark'
 
+# Manage a solution's source file for a given day
 class PuzzleSource
   def self.create_puzzle(year, day)
     padded_day = Day.pad(day)
@@ -10,11 +11,11 @@ class PuzzleSource
     end
   end
 
-  def self.run_part(part_name, &block)
+  def self.run_part(part_name)
     has_result = false
     t = Benchmark.realtime do
       solution = yield
-      if solution != nil
+      if !solution.nil?
         puts "Result for #{part_name}:"
         puts solution
         has_result = true
@@ -22,9 +23,7 @@ class PuzzleSource
         puts "no result for #{part_name}"
       end
     end
-    if has_result
-      puts "(obtained in #{t} seconds)"
-    end
+    puts "(obtained in #{t} seconds)" if has_result
   end
 
   def self.puzzle_source_directory(year)

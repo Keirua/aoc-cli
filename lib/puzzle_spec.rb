@@ -1,3 +1,4 @@
+# Manage a solution's spec file for a given day
 class PuzzleSpec
   def self.spec_source_directory(year)
     File.join('spec', "year#{year}")

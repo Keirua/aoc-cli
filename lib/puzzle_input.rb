@@ -1,10 +1,8 @@
-# Puzzle file management
+# Puzzle input file management
 class PuzzleInput
   def self.load(year, day)
     file_path = puzzle_path(year, day)
-    if !File.exist? file_path
-      self.download(year, day)
-    end
+    download(year, day) if !File.exist? file_path
     File.read(file_path)
   end
 
