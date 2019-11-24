@@ -2,61 +2,52 @@
 require 'httparty'
 require 'dotenv/load'
 require 'thor'
-
-# HTTP API for downloading puzzles
-class AocApi
-  include HTTParty
-  base_uri 'adventofcode.com'
-
-  def initialize(year, session)
-    @year = year
-    @options = { headers: { 'Cookie' => "session=#{session}" } }
-  end
-
-  def day(day_number)
-    self.class.get("/#{@year}/day/#{day_number}/input", @options)
-  end
-end
-
-# Puzzle file management
-class PuzzleCache
-  def self.create_required_directories(year)
-    input_directory = ENV['AOC_INPUT_DIRECTORY']
-    Dir.mkdir(input_directory) if !Dir.exist?(input_directory)
-    year_directory = File.join(input_directory, year)
-    Dir.mkdir(year_directory) if !Dir.exist?(year_directory)
-  end
-
-  def self.puzzle_path(year, day)
-    File.join(ENV['AOC_INPUT_DIRECTORY'], year, "day-#{day}")
-  end
-
-  def self.save_puzzle(year, day, content)
-    create_required_directories(year)
-    File.open(puzzle_path(year, day), 'w') { |f| f.write content }
-  end
-end
+require 'benchmark'
+lib_files = File.join(File.dirname(__FILE__), 'lib', '*.rb')
+src_files = File.join(File.dirname(__FILE__), 'src', '**', '*.rb')
+Dir[lib_files].each { |file| require file }
+Dir[src_files].each { |file| require file }
 
 # The CLI application
 class Aoc < Thor
   desc 'download YEAR DAY', 'downloads an input file'
   method_option :download, aliases: '-d'
   def download(year, day)
-    aoc_api = AocApi.new(year, ENV['AOC_COOKIE'])
-    content = aoc_api.day(day)
-    PuzzleCache.save_puzzle(year, day, content)
+    PuzzleInput.download(year, day)
   end
 
-  desc 'bootstrap YEAR DAY', 'prepares a sample project for a given day'
+  desc 'bootstrap YEAR DAY', 'prepares a sample project for a given day: downloads the input, creates a sample source and spec file'
   method_option :bootstrap, aliases: '-b'
   def bootstrap(year, day)
-    puts "bootstrap #{year} #{day}"
+    ::PuzzleInput.download(year, day)
+    Template.create_templates(year, day)
+    puts "https://adventofcode.com/#{year}/day/#{day}"
   end
 
   desc 'run YEAR DAY', 'executes a given day/year'
   method_option :run_day, aliases: '-r'
   def run_day(year, day)
-    puts "run #{year} #{day}"
+    puzzle = PuzzleSource.create_puzzle(year, day)
+    input = PuzzleInput.load(year, day)
+    PuzzleSource.run_part('part 1') { puzzle.part1(input) }
+    puts
+    PuzzleSource.run_part('part 2') { puzzle.part2(input) }
+  end
+
+  desc 'part1 YEAR DAY', 'executes the part1 for a given day/year'
+  method_option :part1
+  def part1(year, day)
+    puzzle = PuzzleSource.create_puzzle(year, day)
+    input = PuzzleInput.load(year, day)
+    PuzzleSource.run_part('part 1') { puzzle.part1(input) }
+  end
+
+  desc 'part2 YEAR DAY', 'executes the part2 for a given day/year'
+  method_option :part2
+  def part2(year, day)
+    puzzle = PuzzleSource.create_puzzle(year, day)
+    input = PuzzleInput.load(year, day)
+    PuzzleSource.run_part('part 2') { puzzle.part2(input) }
   end
 end
 

@@ -1,4 +1,6 @@
 .idea/
-input/*
+input/**/*
+src/*
+spec/year*
 Gemfile.lock
 .env
