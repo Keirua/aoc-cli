@@ -1,3 +1,5 @@
+require 'byebug'
+
 src_files = File.join(File.dirname(__FILE__), '..', 'src', '**', '*.rb')
 Dir[src_files].each { |f| require f }
 
