@@ -4,6 +4,7 @@ module Year2020
       lines = input.split("\n")
 
       rules = {}
+      cache = {}
       messages = []
 
       lines.each do |line|
@@ -18,11 +19,11 @@ module Year2020
           elsif rule_text.index('|')
             predicates = rule_text.split(' | ')
             rules[rule_number] = OrRule.new(
-              SequenceRule.new(rules, predicates[0].split(' ').map(&:to_i)),
-              SequenceRule.new(rules, predicates[1].split(' ').map(&:to_i))
+              SequenceRule.new(rules, predicates[0].split(' ').map(&:to_i), cache),
+              SequenceRule.new(rules, predicates[1].split(' ').map(&:to_i), cache)
             )
           elsif rule_text.match(/[0-9]/)
-            rules[rule_number] = SequenceRule.new(rules, rule_text.split(' ').map(&:to_i))
+            rules[rule_number] = SequenceRule.new(rules, rule_text.split(' ').map(&:to_i), cache)
           end
         else
           messages << line
@@ -58,17 +59,20 @@ module Year2020
   end
 
   class SequenceRule
-    def initialize(rules, sequence)
+    def initialize(rules, sequence, cache)
       @rules = rules
       @sequence = sequence
+      @cache = cache
     end
 
     def matches?(text)
-      puts text
+      return @cache[[text, *@sequence]] if @cache.has_key?([text, *@sequence])
+      return false if text.length < @sequence.length
+
       k = @sequence.length
       combinations = (0..text.length).to_a.repeated_combination(k - 1).map{|a| [0, *a, -1].each_cons(2).map{|i, j| "#{text} "[i...j]}}
       combinations = combinations.map { |a| a.reject(&:empty?) }.reject { |a| a.length != k }
-      combinations.any? do |combination|
+      matches = combinations.any? do |combination|
         good_combo = true
         @sequence.each_with_index do |rule, i|
           unless @rules[rule].matches?(combination[i])
@@ -78,6 +82,8 @@ module Year2020
         end
         good_combo
       end
+      @cache[[text, *@sequence]] = matches
+      matches
     end
   end
 
